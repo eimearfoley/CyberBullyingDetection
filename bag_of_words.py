@@ -13,14 +13,16 @@ for file in folder:
     file = open('../Insight/2017/textpacket1/' + file, 'r')
     wordslst = []
     for word in file:
-        #re.sub('  ', '', word)
+        # remove tabs, blank spaces, new line spaces
         word = word.strip('\n')
         word = word.strip('\t')
         word = word.strip('        ')
-        wordslst += [word]
+        # split sentences into individual words
+        word = re.sub("[^\w]", " ",  word).split()
+        wordslst += word
     print(wordslst)
     bag_of_words = vectorizer.fit(wordslst)
-    bag_of_words = vectorizer.transform(wordslst)
+    bag_of_words = vectorizer.transform(wordslst) # count word frequency
     print(bag_of_words)
     output.write(str(bag_of_words) + "\n")
     file.close()
