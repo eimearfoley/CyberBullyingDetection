@@ -23,8 +23,7 @@ for file in records:
         vectorizer = CountVectorizer()
         bag_of_words = vectorizer.fit_transform(text_list) # counts word frequency and applies weights to words
         bag_of_words = bag_of_words.toarray() # converts from sparse matrix to 2D array
-        bag_of_words = min_max_scaler.fit_transform(bag_of_words) # normalization
-        print(bag_of_words)
+        #bag_of_words = min_max_scaler.fit_transform(bag_of_words) # normalization
         words_lst = vectorizer.get_feature_names() # all feature names in list
  
         # writes feature name and frequency to dict
