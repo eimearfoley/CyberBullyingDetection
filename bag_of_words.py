@@ -1,27 +1,38 @@
-import os
-import re
-import string
-from os import listdir
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn import preprocessing
+import string
+import numpy as np
+import os
 
-def extract_words(s):
-    return [re.sub('^[{0}]+|[{0}]+$'.format(string.punctuation), '', w).lower() for w in s.split()]
+dataset_loc = './textpacket1'
+records = [os.path.join(dataset_loc, f) for f in os.listdir(dataset_loc)] # dataset 
+punctuation = set(string.punctuation)
+outfile = open('outfile', 'w') # output file
+min_max_scaler = preprocessing.MinMaxScaler() 
 
-folder = [f for f in listdir('../Insight/2017/textpacket1')]
-vectorizer = CountVectorizer()
-output = open('results.txt', 'w')
-
-for file in folder:
-    print(file)
-    file = open('../Insight/2017/textpacket1/' + file, 'r')
-    wordslst = []
-    for line in file:
-        words = extract_words(line)
-        wordslst += words
-    print(wordslst)
-    bag_of_words = vectorizer.fit(wordslst)
-    bag_of_words = vectorizer.transform(wordslst)
-    print(bag_of_words)
-    output.write(str(bag_of_words) + "\n")
-    file.close()
-output.close()
+for file in records:
+    text_list = []
+    name = file
+    to_write = {name: True, 'words':{}} # dict representation of file
+    with open(file, 'r') as the_file:
+        file_contents = the_file.read()  # Read file
+        file_contents = ''.join(ch if ch not in punctuation else ' ' for ch in file_contents)  # Strip punctuation
+        file_contents = ' '.join(file_contents.split())  # Remove whitespace
+        file_contents = file_contents.lower()  # Convert to lowercase
+        text_list.append(file_contents)
+        vectorizer = CountVectorizer()
+        bag_of_words = vectorizer.fit_transform(text_list) # counts word frequency and applies weights to words
+        bag_of_words = bag_of_words.toarray() # converts from sparse matrix to 2D array
+        bag_of_words = min_max_scaler.fit_transform(bag_of_words) # normalization
+        print(bag_of_words)
+        words_lst = vectorizer.get_feature_names() # all feature names in list
+        
+        # writes feature name and weight to dict
+        for w in words_lst:
+            weight = vectorizer.vocabulary_.get(w)
+            to_write['words'][w] = weight
+        """dist = np.sum(bag_of_words, axis=0)
+        for tag, count in zip(words_lst, dist):
+            to_write['words'][tag] = count"""
+        outfile.write(str(to_write) + '\n')
+outfile.close()
