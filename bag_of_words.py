@@ -26,13 +26,11 @@ for file in records:
         bag_of_words = min_max_scaler.fit_transform(bag_of_words) # normalization
         print(bag_of_words)
         words_lst = vectorizer.get_feature_names() # all feature names in list
-        
-        # writes feature name and weight to dict
-        for w in words_lst:
-            weight = vectorizer.vocabulary_.get(w)
-            to_write['words'][w] = weight
-        """dist = np.sum(bag_of_words, axis=0)
+ 
+        # writes feature name and frequency to dict
+        dist = np.sum(bag_of_words, axis=0)
         for tag, count in zip(words_lst, dist):
-            to_write['words'][tag] = count"""
+            to_write['words'][tag] = count
+            
         outfile.write(str(to_write) + '\n')
 outfile.close()
