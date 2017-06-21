@@ -1,9 +1,11 @@
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
+from sklearn import preprocessing
 import pandas as pd
 import numpy as np
 import string
+import nltk
 import os
 
 references = {'./textpacket1/file0.txt': False,'./textpacket1/file1.txt': False,'./textpacket1/file2.txt': True, './textpacket1/file3.txt': True,'./textpacket1/file4.txt': False,'./textpacket1/file5.txt': False, './textpacket1/file6.txt': False,'./textpacket1/file7.txt': True,
@@ -23,12 +25,14 @@ references = {'./textpacket1/file0.txt': False,'./textpacket1/file1.txt': False,
 './textpacket1/file111.txt': True, './textpacket1/file112.txt': False, './textpacket1/file113.txt': False, './textpacket1/file114.txt': True, './textpacket1/file115.txt': False, './textpacket1/file116.txt': True, './textpacket1/file118.txt': False,'./textpacket1/atest': False}
 
 def make_dataset():
+    vectorizer = CountVectorizer()
     dataset_loc = './textpacket1'
     records = [os.path.join(dataset_loc, f) for f in os.listdir(dataset_loc)] # dataset 
     punctuation = set(string.punctuation)
     dataset = []
+    text_list = []
+    min_max_scaler = preprocessing.MinMaxScaler()
     for file in records:
-        text_list = []
         name = file
         to_write = {'filename': name, 'words':[], 'class': references[name]} # if bullying or not
         with open(file, 'r') as the_file:
@@ -37,39 +41,47 @@ def make_dataset():
             file_contents = ' '.join(file_contents.split())  # Remove whitespace
             file_contents = file_contents.lower()  # Convert to lowercase
             text_list.append(file_contents)
-            vectorizer = CountVectorizer()
-            bag_of_words = vectorizer.fit_transform(text_list) # counts word frequency and applies weights to words
-            bag_of_words = bag_of_words.toarray() # converts from sparse matrix to 2D array
-            words_lst = vectorizer.get_feature_names() # all feature names in list
-            dist = np.sum(bag_of_words, axis=0)
-            for tag, count in zip(words_lst, dist):
-                to_write['words'] += [[tag, count]]
-            dataset += [to_write]
+        dataset += [to_write]
+    bag_of_words = vectorizer.fit_transform(text_list) # counts word frequency and applies weights to words
+    bag_of_words = bag_of_words.toarray() # converts from sparse matrix to 2D array
+    bag_of_words = min_max_scaler.fit_transform(bag_of_words) # normalization
+    print(len(bag_of_words))
+    words_lst = vectorizer.get_feature_names() # all feature names in list
+    #print(words_lst)
+    for i in bag_of_words:
+        print('i', len(i))
+        for write in dataset:
+            #write
+            write['words'] += [elt for elt in i]
+        if write['filename'] == './textpacket1/file99.txt':
+            return dataset       
     return dataset
 
 def train_and_test(dataset):
 
     data_frame = pd.DataFrame(dataset) # make dataframe of dataset which is a list of dicts
-    #print(data_frame)
+    print(data_frame)
+    
     # split into test and train sets
     train, test = train_test_split(data_frame, test_size = 0.1666)
-    print(train.shape, test.shape)
+    #print(train.shape, test.shape)
     train_data = train.iloc[:,2].values # array of training data
-    print(train_data)
-    train_target = train.iloc[:,0]#.values # array of training target
-    #print(train_target)
-    print("Length: ", len(train_data), len(train_target))
-    for lst in train_data:
-        print(len(lst))
-    #test_target = test.iloc[:,0]
-    #test_data = test.iloc[:,2]
+    #print(train_data)
+    train_target = train.iloc[:,0].values # array of training target
 
+    print(train_target)
+    #print("Length: ", len(train_data), len(train_target))
+    test_target = test.iloc[:,0]
+    test_data = test.iloc[:,2]
+    #print(len(train_data), len(train_target))
+    #for i in train_target:
+    #    print(len(i))
     classifier = GaussianNB()
-    #classifier.fit(train_data, train_target)
-    classifier.fit([('hello',2),('i',3),('am',2)], [True, False, True])
-    prediction = classifier.predict([[3,1]])
-    #pred = classifier.predict(test_data)
-    print(prediction)
+    #classifier.fit([(2),(3),(2)], [True, False, True])
+    #prediction = classifier.predict([[2]])
+    classifier.fit(train_data, train_target)
+    pred = classifier.predict(test_data)
+    print(pred)
 
 if __name__ == '__main__':
     dataset = make_dataset()
