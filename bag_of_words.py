@@ -4,7 +4,6 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import preprocessing
 from sklearn import svm
-
 import pandas as pd
 import numpy as np
 import string
