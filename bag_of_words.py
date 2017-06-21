@@ -50,22 +50,26 @@ def make_dataset():
 def train_and_test(dataset):
 
     data_frame = pd.DataFrame(dataset) # make dataframe of dataset which is a list of dicts
-    print(data_frame)
+    #print(data_frame)
     # split into test and train sets
     train, test = train_test_split(data_frame, test_size = 0.1666)
     print(train.shape, test.shape)
     train_data = train.iloc[:,2].values # array of training data
     print(train_data)
-    train_target = train.iloc[:,0].values # array of training target
-    print(train_target)
+    train_target = train.iloc[:,0]#.values # array of training target
+    #print(train_target)
     print("Length: ", len(train_data), len(train_target))
+    for lst in train_data:
+        print(len(lst))
     #test_target = test.iloc[:,0]
     #test_data = test.iloc[:,2]
 
     classifier = GaussianNB()
-    classifier.fit(train_data, train_target)
-    #prediction = classifier.predict(test_data)
-    #print(prediction)
+    #classifier.fit(train_data, train_target)
+    classifier.fit([('hello',2),('i',3),('am',2)], [True, False, True])
+    prediction = classifier.predict([[3,1]])
+    #pred = classifier.predict(test_data)
+    print(prediction)
 
 if __name__ == '__main__':
     dataset = make_dataset()
