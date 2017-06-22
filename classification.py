@@ -5,6 +5,9 @@ from sklearn.svm import LinearSVC
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import cohen_kappa_score
+from scipy import stats
 import string
 import os
 
@@ -30,6 +33,7 @@ if __name__ == '__main__':
 
     files = [os.path.join(dataset_loc, f) for f in os.listdir(dataset_loc)]
     punctuation = set(string.punctuation)
+    punctuation.remove("'")
     texts = []
 
     for file in files:
@@ -59,5 +63,15 @@ if __name__ == '__main__':
                   (dtc, 'Decision Tree')]:
         clf.fit(X_train, y_train)
         y_pred = clf.predict(X_test)
-        print('\n*** %s ***' %name)
+        print('\n***** %s *****' %name)
+        print('\nClassification Report: ')
         print(classification_report(y_test, y_pred))
+        print('\nConfusion Matrix: ')
+        cmtx = confusion_matrix(y_test, y_pred)
+        print(cmtx)
+        acc = (cmtx[0][0] + cmtx[1][1])/(cmtx[0][0] + cmtx[1][1] + cmtx[0][1] + cmtx[1][0])
+        print('Accuracy: %.2f' % acc)
+        print('\nKappa Score: ')
+        print('%.2f' % cohen_kappa_score(y_test, y_pred))
+        print('\nt-test: ')
+        print(stats.ttest_ind(y_test, y_pred))
