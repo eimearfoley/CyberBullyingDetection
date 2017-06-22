@@ -1,9 +1,13 @@
-import os
 from sklearn.feature_extraction.text import CountVectorizer
-import string
 from sklearn.model_selection import train_test_split
+from sklearn import tree
+from sklearn.svm import LinearSVC
+from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
+import string
+import os
+
 
 if __name__ == '__main__':
     dataset_loc = './textpacket1'
@@ -42,11 +46,18 @@ if __name__ == '__main__':
     X = bag_of_words.toarray()
     y = [1 if ground_truth[f] else 0 for f in files]
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.166)
 
-    classifier = RandomForestClassifier()
+    gnb = GaussianNB()
+    svc = LinearSVC()
+    rfc = RandomForestClassifier()
+    dtc = tree.DecisionTreeClassifier()
 
-    classifier.fit(X_train, y_train)
-    y_pred = classifier.predict(X_test)
-
-    print(classification_report(y_test, y_pred))
+    for clf, name in [(gnb, 'Naive Bayes'),
+                  (rfc, 'Random Forest'),
+                  (svc, 'Linear Support Vector Classification'),
+                  (dtc, 'Decision Tree')]:
+        clf.fit(X_train, y_train)
+        y_pred = clf.predict(X_test)
+        print('\n*** %s ***' %name)
+        print(classification_report(y_test, y_pred))
