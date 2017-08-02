@@ -7,17 +7,21 @@ Create a model which will carry out the detection of textual cyber bullying with
 ## Methods
 
 Using bad of words and Td-Idf on our dataset
+
 Then use train and test split, 10-fold cross validation
+
 Our test and train data is passed through to the following classifier:
 - Linear SVM
 - Random Forest
 - Gaussian Naive Bayes
 - Decision Tree
+
 Results are measured using:
 - Classification report (f1 score, accuracy, precision, recall)
 - Confusion Matrix
 - Kappa Score
 - T-test
+
 Results are plotted using matplotlib
 
 ## Languages & Tools Used
