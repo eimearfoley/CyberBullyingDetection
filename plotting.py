@@ -13,6 +13,8 @@ import string
 import csv
 import os
 
+random_seed = 41
+
 def make_dataset():
     # dict contains the answers from the formspring data as keys and the combination of bullying occurances in the messages
     dct={}
@@ -25,7 +27,7 @@ def make_dataset():
     bully2 =10
     bully3 = 13
     wrong = ['None', 'n/a', 'o', 'n/a0', "0`", "`0", 'N/a', 'N/A', 'n/A']
-    with open('formspring.csv') as csvfile:
+    with open('formspring1.csv') as csvfile:
         reader = csv.reader(csvfile)
         i=0
         for rows in reader:
@@ -52,7 +54,6 @@ def make_dataset():
                         dct[rows[part]] = False                         
             i+=1
         return dct # return dataset as dictionary with keys as text and values as True/False
-
 
 def make_samples(dct, n):
     sample = {}
@@ -135,7 +136,8 @@ def results(y_test, y_pred, clas):
 
 if __name__ == "__main__":
     data = make_dataset()
-    clf ={'Linear SVM Classifier': LinearSVC(), 'RandomForest Classifier': RandomForestClassifier(), 'GaussianNB': GaussianNB(), 'Decision Tree': tree.DecisionTreeClassifier()}
+    clf ={'Linear SVM Classifier': LinearSVC(random_state=random_seed), 'RandomForest Classifier': RandomForestClassifier(random_state=random_seed), 'GaussianNB': GaussianNB(), 'Decision Tree': tree.DecisionTreeClassifier(random_state=random_seed)}
+    fig_num = 0
     for clas in clf:
         print("CLASSIFIER: %s" % clas)
         k_scores = []
@@ -160,14 +162,15 @@ if __name__ == "__main__":
             kt_s += [kt]
             at_s += [at]
             n_range += [n]
-        fig = plt.figure()
+        fig = plt.figure(fig_num)
+        #subplot is the figure name
         ax = fig.add_subplot(111)
         plt.title('%s' % clas)
         plt.xlabel('Data Subsets')
         plt.ylabel('Kappa & Accuracy Scores')
         plt.plot(n_range, k_scores, 'ro-', label='Bag Kappa')
         plt.plot(n_range, a_scores, 'bo-', label='Bag Accuracy')
-        plt.plot(n_range, kt_s, 'o-', label='TFIDF Kappa')
+        plt.plot(n_range, kt_s, 'mo-', label='TFIDF Kappa')
         plt.plot(n_range, at_s, 'go-', label='TFIDF Accuracy')
         plt.legend()
         for xy in zip(n_range, k_scores):
@@ -179,4 +182,5 @@ if __name__ == "__main__":
         for xy in zip(n_range, at_s):
             ax.annotate('%.2f' % xy[1], xy=xy, textcoords='data')
         plt.grid()
-        plt.show()            
+        fig_num+=1
+    plt.show()
