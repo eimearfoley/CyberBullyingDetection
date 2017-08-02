@@ -27,7 +27,7 @@ def make_dataset():
     bully2 =10
     bully3 = 13
     wrong = ['None', 'n/a', 'o', 'n/a0', "0`", "`0", 'N/a', 'N/A', 'n/A']
-    with open('formspring1.csv') as csvfile:
+    with open('formspring.csv') as csvfile:
         reader = csv.reader(csvfile)
         i=0
         for rows in reader:
