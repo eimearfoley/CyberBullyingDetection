@@ -108,7 +108,7 @@ def train_test(X, y, svm_bow, clas, classifier):
     print("Training and testing")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2) # split data for train and test
     print("\nClassifiers")
-    if clas == "SVM Classifier":
+    if clas == "Linear SVM Classifier":
         bag = svm_bow.toarray() # use normalized data for SVM classifier
         bag_train, bag_test, y_train, y_test = train_test_split(bag, y, test_size=0.2)
         classifier.fit(bag_train, y_train)
@@ -121,7 +121,7 @@ def train_test(X, y, svm_bow, clas, classifier):
 def k_fold(X, y, svm_bow, clas, classifier):
     y = np.array(y)
     skf = StratifiedKFold(n_splits=10)
-    if clas == "SVM Classifier":
+    if clas == "Linear SVM Classifier":
         bag = svm_bow.toarray() # use normalized data for SVM classifier
         for train_index, test_index in skf.split(bag, y):
             X_train, X_test = X[train_index], X[test_index]
