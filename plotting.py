@@ -108,7 +108,7 @@ def train_test(X, y, svm_bow, clas, classifier):
     print("Training and testing")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2) # split data for train and test
     print("\nClassifiers")
-    if clas == "Linear SVM Classifier":
+    if clas == "SVM Classifier":
         bag = svm_bow.toarray() # use normalized data for SVM classifier
         bag_train, bag_test, y_train, y_test = train_test_split(bag, y, test_size=0.2)
         classifier.fit(bag_train, y_train)
@@ -121,7 +121,7 @@ def train_test(X, y, svm_bow, clas, classifier):
 def k_fold(X, y, svm_bow, clas, classifier):
     y = np.array(y)
     skf = StratifiedKFold(n_splits=10)
-    if clas == "Linear SVM Classifier":
+    if clas == "SVM Classifier":
         bag = svm_bow.toarray() # use normalized data for SVM classifier
         for train_index, test_index in skf.split(bag, y):
             X_train, X_test = X[train_index], X[test_index]
@@ -130,15 +130,17 @@ def k_fold(X, y, svm_bow, clas, classifier):
         for train_index, test_index in skf.split(X, y):
             X_train, X_test = X[train_index], X[test_index]
             y_train, y_test = y[train_index], y[test_index]
-    clf[clas].fit(X_train, y_train)
-    y_pred = clf[clas].predict(X_test)
+    classifier.fit(X_train, y_train)
+    y_pred = classifier.predict(X_test)
     return results(y_test, y_pred, clas)
 
 def cross_fold(X, y, svm_bow, clas, classifier):
     if clas == "SVM Classifier":
         X = svm_bow.toarray() # use normalized data for SVM classifier
     scores = cross_val_score(classifier, X, y, cv=10, scoring='f1')
-    print("Average: %.2f" % (sum(scores) / float(len(scores))))
+    acc = (sum(scores) / float(len(scores)))
+    print("Average: %.2f" % acc)
+    return scores
 
 def results(y_test, y_pred, clas):
     # print results and scores of all classifiers
@@ -158,6 +160,38 @@ def results(y_test, y_pred, clas):
     print(stats.ttest_ind(y_test, y_pred))
     return kappa, acc, fn
 
+def make_file():
+    data = make_dataset()
+    clf =[('Linear SVM Classifier', LinearSVC(random_state=random_seed)), ('RandomForest Classifier', RandomForestClassifier(random_state=random_seed)), ('GaussianNB', GaussianNB()), ('Decision Tree', tree.DecisionTreeClassifier(random_state=random_seed))]
+    points = [100, 1500, 3000]
+    for n in points:
+        fh = open('%iresult.txt' % n, 'w')
+        for t in clf:
+            clas = t[0]
+            classifier = t[1]
+            print("****NUMBER: %i ****" % n)
+            dct = make_samples(data, n)    
+            print("\n****BAG OF WORDS****\n")
+            X, y, svm_bow = make_bag_of_words(dct)
+            print("\n****TFIDF****\n")
+            X2, y2, svm_tfidf = make_tfidf(dct)
+            print("\n*** CROSS FOLD VALIDATION BAG ***\n")
+            cf = cross_fold(X, y, svm_bow, clas, classifier)
+            print("\n*** CROSS FOLD VALIDATION TFIDF ***\n")
+            cft = cross_fold(X, y, svm_tfidf, clas, classifier)
+            print("\n**** K-FOLD BAG ****\n")
+            kfbk, kfba, kfbfn = k_fold(X, y, svm_bow, clas, classifier)
+            print("\n**** K-FOLD TFIDF ****\n")
+            kftk, kfta, kftfn = k_fold(X2, y2, svm_tfidf, clas, classifier)
+            for i in cf:
+                fh.write("%.2f\t" % (i))
+            fh.write("\n%.2f\n%.2f\n" % (kfbfn, kfbk))
+            for i in cft:
+                fh.write("%.2f\t" % (i))
+            fh.write("\n%.2f\n%.2f\n" % (kftfn, kftk))
+make_file()
+
+"""
 if __name__ == "__main__":
     data = make_dataset()
     clf ={'Linear SVM Classifier': LinearSVC(random_state=random_seed), 'RandomForest Classifier': RandomForestClassifier(random_state=random_seed), 'GaussianNB': GaussianNB(), 'Decision Tree': tree.DecisionTreeClassifier(random_state=random_seed)}
@@ -188,8 +222,10 @@ if __name__ == "__main__":
             k, a, tbfn = train_test(X,y, svm_bow, clas, classifier)
             print("\n**** TRAIN & TEST TFIDF ****\n")
             kt, at, ttfn = train_test(X2,y2, svm_tfidf, clas, classifier)
-            print("\n*** CROSS FOLD VALIDATION ***\n")
+            print("\n*** CROSS FOLD VALIDATION BAG ***\n")
             print(cross_fold(X, y, svm_bow, clas, classifier))
+            print("\n*** CROSS FOLD VALIDATION TFIDF ***\n")
+            print(cross_fold(X, y, svm_tfidf, clas, classifier))
             print("\n**** K-FOLD BAG ****\n")
             kfbk, kfba, kfbfn = k_fold(X, y, svm_bow, clas, classifier)
             print("\n**** K-FOLD TFIDF ****\n")
@@ -261,3 +297,4 @@ if __name__ == "__main__":
             ax3.annotate('%.2f' % xy[1], xy=xy, textcoords='data')
         plt.grid()
     plt.show()
+"""
